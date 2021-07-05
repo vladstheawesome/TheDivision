@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "PickableItem.generated.h"
 
+class UDamageType;
 UCLASS()
 class THEDIVISION_API APickableItem : public AActor
 {
@@ -21,6 +21,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Fire();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	TSubclassOf<UDamageType> DamageType;
 
 public:	
 	// Called every frame

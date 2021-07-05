@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "PickableItem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APickableItem::APickableItem()
@@ -19,7 +19,6 @@ APickableItem::APickableItem()
 
 	InteractableArea = CreateDefaultSubobject<USphereComponent>(TEXT("InteractableArea"));
 	InteractableArea->SetupAttachment(ItemMesh);
-
 }
 
 // Called when the game starts or when spawned
@@ -31,10 +30,7 @@ void APickableItem::BeginPlay()
 void APickableItem::Fire()
 {
 	// Trace the world, from pawn eyes to crosshair location (which is the center screen)
-
 	AActor* MyOwner = GetOwner();
-
-	//MyOwner->FindComponentByClass<
 
 	if (MyOwner)
 	{
@@ -42,7 +38,8 @@ void APickableItem::Fire()
 		FRotator EyeRotation;
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
-		FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * 10000);
+		FVector ShotDirection = EyeRotation.Vector();
+		FVector TraceEnd = EyeLocation + (ShotDirection * 10000);
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(MyOwner);
@@ -53,6 +50,10 @@ void APickableItem::Fire()
 		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, ECC_Visibility, QueryParams))
 		{
 			// BLocking hit! Process damage
+
+			AActor* HitActor = Hit.GetActor();
+
+			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
 		}
 
 		DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
