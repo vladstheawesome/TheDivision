@@ -4,8 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "PickableItem.generated.h"
-
 class UDamageType;
+class UParticleSystem;
 UCLASS()
 class THEDIVISION_API APickableItem : public AActor
 {
@@ -24,6 +24,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageType;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	FName MuzzleSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	FName TracerTargetName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	UParticleSystem* MuzzleEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	UParticleSystem* TracerEffect;
 
 public:	
 	// Called every frame
