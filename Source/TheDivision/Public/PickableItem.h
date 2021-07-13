@@ -40,16 +40,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
 	UParticleSystem* TracerEffect;
 
+	UPROPERTY(VisibleAnywhere)
+		USkeletalMeshComponent* ItemMesh;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
 private:
 	UPROPERTY(VisibleAnywhere)
 		USceneComponent* Root;
-
-	UPROPERTY(VisibleAnywhere)
-		USkeletalMeshComponent* ItemMesh;
+	
 
 	UPROPERTY(VisibleAnywhere)
 		USphereComponent* InteractableArea;
