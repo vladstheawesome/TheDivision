@@ -17,6 +17,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
+	ZoomedFOV = 45.0f;
+	ZoomInterpSpeed = 20.0f;
 }
 
 // Called when the game starts or when spawned
@@ -24,6 +26,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	DefaultFOV = CameraComp->FieldOfView;
 }
 
 // Called every frame
@@ -31,6 +34,21 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
+
+	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
+
+	TArray<AActor*> myWeapons;
+	AActor* PlayerCharacter = GetOwner();
+
+	PlayerCharacter->GetAttachedActors(myWeapons);
+	/*if(myWeapons[0])
+	{
+		CameraComp->SetFieldOfView(NewFOV);
+	}*/
+
+	int test = 0;
+	
 }
 
 // Called to bind functionality to input
@@ -38,6 +56,23 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &APlayerCharacter::BeginZoom);
+	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &APlayerCharacter::EndZoom);
+}
+
+void APlayerCharacter::BeginZoom()
+{
+	bWantsToZoom = true;
+
+	TArray<AActor*> myWeapons;
+	AActor* PlayerCharacter = GetOwner();
+
+	PlayerCharacter->GetAttachedActors(myWeapons);
+}
+
+void APlayerCharacter::EndZoom()
+{
+	bWantsToZoom = false;
 }
 
 FVector APlayerCharacter::GetPawnViewLocation() const
