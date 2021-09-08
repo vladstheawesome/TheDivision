@@ -2,8 +2,8 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "PickableItem.h"
 #include "PlayerCharacter.generated.h"
-
 class UCameraComponent;
 class USpringArmComponent;
 UCLASS()
@@ -40,7 +40,12 @@ protected:
 
 	void EndZoom();
 
+	APickableItem* CurrentWeapon;
+
 public:	
+
+
+	void Fire();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

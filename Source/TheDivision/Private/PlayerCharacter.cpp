@@ -3,6 +3,7 @@
 #include "PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "PickableItem.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -58,6 +59,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &APlayerCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &APlayerCharacter::EndZoom);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::Fire);
 }
 
 void APlayerCharacter::BeginZoom()
@@ -73,6 +76,14 @@ void APlayerCharacter::BeginZoom()
 void APlayerCharacter::EndZoom()
 {
 	bWantsToZoom = false;
+}
+
+void APlayerCharacter::Fire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Fire();
+	}
 }
 
 FVector APlayerCharacter::GetPawnViewLocation() const
