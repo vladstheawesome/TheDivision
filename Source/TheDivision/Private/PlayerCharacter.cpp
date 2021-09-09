@@ -20,6 +20,9 @@ APlayerCharacter::APlayerCharacter()
 
 	ZoomedFOV = 45.0f;
 	ZoomInterpSpeed = 20.0f;
+
+	WeaponAttachSocketName = "Rifle_UnequipSocket";
+	WeaponEquipSocketName = "Rifle_EquipSocket";
 }
 
 // Called when the game starts or when spawned
@@ -28,6 +31,17 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	DefaultFOV = CameraComp->FieldOfView;
+
+	//Spawn a default weapon
+	/*FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CurrentWeapon = GetWorld()->SpawnActor<APickableItem>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+	}*/
 }
 
 // Called every frame
@@ -61,6 +75,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &APlayerCharacter::EndZoom);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::Fire);
+
+	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::Equip);
 }
 
 void APlayerCharacter::BeginZoom()
@@ -84,6 +100,15 @@ void APlayerCharacter::Fire()
 	{
 		CurrentWeapon->Fire();
 	}
+}
+
+void APlayerCharacter::Equip()
+{
+	//if (CurrentWeapon)
+	//{
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponEquipSocketName);
+	//}
 }
 
 FVector APlayerCharacter::GetPawnViewLocation() const

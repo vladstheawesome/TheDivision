@@ -39,12 +39,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 		USkeletalMeshComponent* ItemMesh;
-
-public:
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		virtual void Fire();
-
 private:
 	UPROPERTY(VisibleAnywhere)
 		USceneComponent* Root;
@@ -52,5 +46,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		USphereComponent* InteractableArea;
+
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		virtual void Fire();
+
 
 };

@@ -6,6 +6,7 @@
 #include "PlayerCharacter.generated.h"
 class UCameraComponent;
 class USpringArmComponent;
+class APickableItem;
 UCLASS()
 class THEDIVISION_API APlayerCharacter : public ACharacter
 {
@@ -42,10 +43,21 @@ protected:
 
 	APickableItem* CurrentWeapon;
 
-public:	
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<APickableItem> StarterWeaponClass;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+	FName WeaponAttachSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+	FName WeaponEquipSocketName;
 
 	void Fire();
+
+	void Equip();
+
+public:	
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
