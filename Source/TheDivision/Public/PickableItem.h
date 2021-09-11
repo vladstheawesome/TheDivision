@@ -17,6 +17,8 @@ public:
 
 protected:
 
+	virtual void BeginPlay() override;
+
 	void PlayFireEffects(FVector TraceEnd);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
@@ -42,18 +44,36 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 		USkeletalMeshComponent* ItemMesh;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float BaseDamage;
+
+	
+
+	FTimerHandle TimerHandle_TimeBetweenShots;
+
+	float LastFireTime;
+
+	/*RPM - Rounds Per Minute fired*/
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float RateOfFire;
+
+	float TimeBetweenShots;
+
 private:
 	UPROPERTY(VisibleAnywhere)
-		USceneComponent* Root;
-	
+		USceneComponent* Root;	
 
 	UPROPERTY(VisibleAnywhere)
 		USphereComponent* InteractableArea;
 
 public:
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		virtual void Fire();
+	void StartFire();
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void StopFire();
 
-
+	//UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Fire();
 };

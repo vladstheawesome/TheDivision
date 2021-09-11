@@ -13,8 +13,11 @@ UCLASS()
 class THEDIVISION_API APickableItemPistol : public APickableItem
 {
 	GENERATED_BODY()
+
+public:
+	APickableItemPistol();
 	
 protected:
 
-	virtual void Fire() override;
+	//virtual void Fire() override;
 };

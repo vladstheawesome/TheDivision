@@ -8,22 +8,22 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 
-void APickableItemLauncher::Fire()
-{
-	AActor* MyOwner = GetOwner();
-
-	if (MyOwner && ProjectileClass)
-	{
-		FVector EyeLocation;
-		FRotator EyeRotation;
-		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-
-		FVector MuzzleLocation = ItemMesh->GetSocketLocation(MuzzleSocketName);
-		//FRotator MuzzleRotation = ItemMesh->GetSocketRotation(MuzzleSocketName);
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, EyeRotation, SpawnParams);
-	}
-}
+//void APickableItemLauncher::Fire()
+//{
+//	AActor* MyOwner = GetOwner();
+//
+//	if (MyOwner && ProjectileClass)
+//	{
+//		FVector EyeLocation;
+//		FRotator EyeRotation;
+//		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+//
+//		FVector MuzzleLocation = ItemMesh->GetSocketLocation(MuzzleSocketName);
+//		//FRotator MuzzleRotation = ItemMesh->GetSocketRotation(MuzzleSocketName);
+//
+//		FActorSpawnParameters SpawnParams;
+//		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+//
+//		GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, EyeRotation, SpawnParams);
+//	}
+//}

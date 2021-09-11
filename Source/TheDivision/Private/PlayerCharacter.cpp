@@ -53,17 +53,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
 
-	TArray<AActor*> myWeapons;
+	/*TArray<AActor*> myWeapons;
 	AActor* PlayerCharacter = GetOwner();
 
 	PlayerCharacter->GetAttachedActors(myWeapons);
-	/*if(myWeapons[0])
+	if(myWeapons[0])
 	{
 		CameraComp->SetFieldOfView(NewFOV);
-	}*/
-
-	int test = 0;
-	
+	}*/	
 }
 
 // Called to bind functionality to input
@@ -74,9 +71,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &APlayerCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &APlayerCharacter::EndZoom);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::StopFire);
 
-	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::Equip);
+	//PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::Equip);
 }
 
 void APlayerCharacter::BeginZoom()
@@ -94,22 +92,30 @@ void APlayerCharacter::EndZoom()
 	bWantsToZoom = false;
 }
 
-void APlayerCharacter::Fire()
+void APlayerCharacter::StartFire()
 {
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->Fire();
+		CurrentWeapon->StartFire();
 	}
 }
 
-void APlayerCharacter::Equip()
+void APlayerCharacter::StopFire()
 {
-	//if (CurrentWeapon)
-	//{
-		CurrentWeapon->SetOwner(this);
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponEquipSocketName);
-	//}
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StopFire();
+	}
 }
+
+//void APlayerCharacter::Equip()
+//{
+//	//if (CurrentWeapon)
+//	//{
+//		CurrentWeapon->SetOwner(this);
+//		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponEquipSocketName);
+//	//}
+//}
 
 FVector APlayerCharacter::GetPawnViewLocation() const
 {

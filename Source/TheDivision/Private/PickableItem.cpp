@@ -6,6 +6,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "TimerManager.h"
 #include "TheDivision/TheDivision.h"
 
 static int32 DebugWeaponDrawing = 0;
@@ -29,6 +30,17 @@ APickableItem::APickableItem()
 
 	MuzzleSocketName = "MuzzleSocket";
 	TracerTargetName = "Target";
+
+	BaseDamage = 20.0f;
+
+	RateOfFire = 600;
+}
+
+void APickableItem::BeginPlay()
+{
+	Super::BeginPlay();
+
+	TimeBetweenShots = 60 / RateOfFire;
 }
 
 void APickableItem::Fire()
@@ -60,11 +72,17 @@ void APickableItem::Fire()
 			// BLocking hit! Process damage
 			AActor* HitActor = Hit.GetActor();
 
-			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
-			
 			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
-			UParticleSystem* SelectedEffect = nullptr;
 
+			float ActualDamage = BaseDamage;
+			if (SurfaceType == SURFACE_FLESHVULNERABLE)
+			{
+				ActualDamage *= 3.0f;
+			}
+
+			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
+			
+			UParticleSystem* SelectedEffect = nullptr;
 			switch (SurfaceType)
 			{
 			case SURFACE_FLESHDEFAULT:
@@ -90,7 +108,21 @@ void APickableItem::Fire()
 		}		
 
 		PlayFireEffects(TracerEndPoint);
+
+		LastFireTime = GetWorld()->TimeSeconds;
 	}	
+}
+
+void APickableItem::StartFire()
+{
+	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &APickableItem::Fire, TimeBetweenShots, true, FirstDelay);
+}
+
+void APickableItem::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
 }
 
 void APickableItem::PlayFireEffects(FVector TracerEndPoint)

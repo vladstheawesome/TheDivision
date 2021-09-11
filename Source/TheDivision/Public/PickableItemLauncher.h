@@ -16,7 +16,7 @@ class THEDIVISION_API APickableItemLauncher : public APickableItem
 
 protected:
 
-	virtual void Fire() override;
+	//virtual void Fire() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileWeapon")
 		TSubclassOf<AActor> ProjectileClass;

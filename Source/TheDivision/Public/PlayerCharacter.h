@@ -52,9 +52,11 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 	FName WeaponEquipSocketName;
 
-	void Fire();
+	void StartFire();
 
-	void Equip();
+	void StopFire();
+
+	//void Equip();
 
 public:	
 
