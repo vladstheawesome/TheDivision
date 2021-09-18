@@ -4,6 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "PickableItem.h"
+#include "PickableItemPistol.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -18,49 +19,56 @@ APlayerCharacter::APlayerCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
-	ZoomedFOV = 45.0f;
-	ZoomInterpSpeed = 20.0f;
+	RifleAttachSocketName = "Rifle_UnequipSocket";
+	RifleEquipSocketName = "Rifle_EquipSocket";
 
-	WeaponAttachSocketName = "Rifle_UnequipSocket";
-	WeaponEquipSocketName = "Rifle_EquipSocket";
+	PistolAttachSocketName = "Pistol_UnequipSocket";
+	PistolEquipSocketName = "Pistol_EquipSocket";
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	DefaultFOV = CameraComp->FieldOfView;
 
-	//Spawn a default weapon
-	/*FActorSpawnParameters SpawnParams;
+	SpawnWeapons();
+}
+
+void APlayerCharacter::SpawnWeapons()
+{
+	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	CurrentWeapon = GetWorld()->SpawnActor<APickableItem>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 
-	if (CurrentWeapon)
+	SpawnPrimaryWeapon(SpawnParams);
+	SpawnSecondaryWeapon(SpawnParams);
+}
+
+void APlayerCharacter::SpawnPrimaryWeapon(FActorSpawnParameters& SpawnParams)
+{
+	PrimaryWeaponToEquip = GetWorld()->SpawnActor<APickableItem>(PrimaryWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+	if (PrimaryWeaponToEquip)
 	{
-		CurrentWeapon->SetOwner(this);
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
-	}*/
+		PrimaryWeaponToEquip->SetOwner(this);
+		PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleAttachSocketName);
+	}
+}
+
+void APlayerCharacter::SpawnSecondaryWeapon(FActorSpawnParameters& SpawnParams)
+{
+	SecondaryWeaponToEquip = GetWorld()->SpawnActor<APickableItemPistol>(SecondaryWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+	if (SecondaryWeaponToEquip)
+	{
+		SecondaryWeaponToEquip->SetOwner(this);
+		SecondaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PistolAttachSocketName);
+	}
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	float TargetFOV = bWantsToZoom ? ZoomedFOV : DefaultFOV;
-
-	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
-
-	/*TArray<AActor*> myWeapons;
-	AActor* PlayerCharacter = GetOwner();
-
-	PlayerCharacter->GetAttachedActors(myWeapons);
-	if(myWeapons[0])
-	{
-		CameraComp->SetFieldOfView(NewFOV);
-	}*/	
 }
 
 // Called to bind functionality to input
@@ -68,54 +76,47 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &APlayerCharacter::BeginZoom);
-	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &APlayerCharacter::EndZoom);
-
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::StartFire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::StopFire);
 
-	//PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::Equip);
-}
-
-void APlayerCharacter::BeginZoom()
-{
-	bWantsToZoom = true;
-
-	TArray<AActor*> myWeapons;
-	AActor* PlayerCharacter = GetOwner();
-
-	PlayerCharacter->GetAttachedActors(myWeapons);
-}
-
-void APlayerCharacter::EndZoom()
-{
-	bWantsToZoom = false;
+	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::EquipPrimary);
 }
 
 void APlayerCharacter::StartFire()
 {
-	if (CurrentWeapon)
+	if (EquipedWeapon)
 	{
-		CurrentWeapon->StartFire();
+		EquipedWeapon->StartFire();
 	}
 }
 
 void APlayerCharacter::StopFire()
 {
-	if (CurrentWeapon)
+	if (EquipedWeapon)
 	{
-		CurrentWeapon->StopFire();
+		EquipedWeapon->StopFire();
 	}
 }
 
-//void APlayerCharacter::Equip()
+void APlayerCharacter::EquipPrimary()
+{	
+	PrimaryWeaponToEquip->SetOwner(this);
+	//CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponEquipSocketName);
+	
+}
+
+//void APlayerCharacter::EquipWeapon(APickableItem* Weapon)
 //{
-//	//if (CurrentWeapon)
-//	//{
-//		CurrentWeapon->SetOwner(this);
-//		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponEquipSocketName);
-//	//}
+//	if (Weapon)
+//	{
+//		SetCurrentWeapon(Weapon, EquipedWeapon);
+//	}
 //}
+//
+//void APlayerCharacter::SetCurrentWeapon(APickableItem* newWeapon, APickableItem* LastWeapon)
+//{
+//}
+
 
 FVector APlayerCharacter::GetPawnViewLocation() const
 {

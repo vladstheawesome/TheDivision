@@ -6,7 +6,7 @@
 #include "PlayerCharacter.generated.h"
 class UCameraComponent;
 class USpringArmComponent;
-class APickableItem;
+class APickableItem; class APickableItemPistol;
 UCLASS()
 class THEDIVISION_API APlayerCharacter : public ACharacter
 {
@@ -20,43 +20,46 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void SpawnWeapons();
+	void SpawnPrimaryWeapon(FActorSpawnParameters& SpawnParams);
+	void SpawnSecondaryWeapon(FActorSpawnParameters& SpawnParams);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		USpringArmComponent* SpringArmComp;
 
-	bool bWantsToZoom;
+	APickableItem* EquipedWeapon;
+
+	APickableItem* PrimaryWeaponToEquip;
+	APickableItemPistol* SecondaryWeaponToEquip;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
-	float ZoomedFOV;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
-	float ZoomInterpSpeed;
-
-	/* Default FOV set during begin play*/
-	float DefaultFOV;
-
-	void BeginZoom();
-
-	void EndZoom();
-
-	APickableItem* CurrentWeapon;
+	TSubclassOf<APickableItem> PrimaryWeaponClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
-	TSubclassOf<APickableItem> StarterWeaponClass;
+	TSubclassOf<APickableItem> SecondaryWeaponClass;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
-	FName WeaponAttachSocketName;
+	FName RifleAttachSocketName;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
-	FName WeaponEquipSocketName;
+	FName RifleEquipSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+	FName PistolAttachSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+	FName PistolEquipSocketName;
 
 	void StartFire();
 
 	void StopFire();
 
-	//void Equip();
+	/*void SetCurrentWeapon(class APickableItem* newWeapon, class APickableItem* LastWeapon = nullptr);
+
+	void EquipWeapon(APickableItem* Weapon);*/
 
 public:	
 
@@ -67,5 +70,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual FVector GetPawnViewLocation() const override;
+
+	void EquipPrimary();
 
 };
