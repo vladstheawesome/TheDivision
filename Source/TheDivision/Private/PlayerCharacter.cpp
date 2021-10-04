@@ -5,7 +5,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "PickableItem.h"
 #include "PickableItemPistol.h"
+#include "PlayerAnimations.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
+class UPawnMovementComponent;
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -21,6 +26,7 @@ APlayerCharacter::APlayerCharacter()
 
 	RifleAttachSocketName = "Rifle_UnequipSocket";
 	RifleEquipSocketName = "Rifle_EquipSocket";
+	RifleUnEquipSocketName = "Rifle_UnequipSocket";
 
 	PistolAttachSocketName = "Pistol_UnequipSocket";
 	PistolEquipSocketName = "Pistol_EquipSocket";
@@ -31,7 +37,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpawnWeapons();
+	SpawnWeapons();	
 }
 
 void APlayerCharacter::SpawnWeapons()
@@ -79,7 +85,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::StartFire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::StopFire);
 
-	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::EquipPrimary);
+	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::TogglePrimaryWeapon);
+
+	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
+}
+
+void APlayerCharacter::LookUp(float AxisValue)
+{
+
 }
 
 void APlayerCharacter::StartFire()
@@ -98,25 +112,50 @@ void APlayerCharacter::StopFire()
 	}
 }
 
-void APlayerCharacter::EquipPrimary()
-{	
-	PrimaryWeaponToEquip->SetOwner(this);
-	//CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponEquipSocketName);
-	
+void APlayerCharacter::TogglePrimaryWeapon()
+{
+	bPrimaryToEquip = !bPrimaryToEquip;
+
+	if (PrimaryWeaponToEquip)
+	{			
+		if (auto Anim = Cast<UPlayerAnimations>(GetMesh()->GetAnimInstance()))
+		{
+			Anim->IsRifleCombatMode = !Anim->IsRifleCombatMode;
+
+			// TODO: Spawn Crosshairs
+			// TODO: Refactor if statements -> Create Equip/Unequip methods 
+					//(thus can be called by other secondary weapon functions)
+
+			ACharacter* MyCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+
+			if (Anim->IsRifleCombatMode == true) // We Equip
+			{
+				if (MyCharacter)
+				{
+					GetCharacterMovement()->bOrientRotationToMovement = false;
+					bUseControllerRotationYaw = true;
+				}
+
+				Anim->AxisTurn_ = InputComponent->GetAxisValue("Turn");;
+				EquipedWeapon = PrimaryWeaponToEquip;
+				PrimaryWeaponToEquip->SetOwner(this);
+				PlayAnimMontage(RifleEquipMontage, 1, NAME_None);
+				PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleEquipSocketName);
+			}
+			else // We UnEquip
+			{
+				// Set Equipped Weapon to null?
+				GetCharacterMovement()->bOrientRotationToMovement = true;
+				bUseControllerRotationYaw = false;
+
+				Anim->AxisTurn_ = 0;
+				PrimaryWeaponToEquip->SetOwner(this);
+				PlayAnimMontage(RifleUnEquipMontage, 1, NAME_None);
+				PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleUnEquipSocketName);
+			}
+		}
+	}	
 }
-
-//void APlayerCharacter::EquipWeapon(APickableItem* Weapon)
-//{
-//	if (Weapon)
-//	{
-//		SetCurrentWeapon(Weapon, EquipedWeapon);
-//	}
-//}
-//
-//void APlayerCharacter::SetCurrentWeapon(APickableItem* newWeapon, APickableItem* LastWeapon)
-//{
-//}
-
 
 FVector APlayerCharacter::GetPawnViewLocation() const
 {

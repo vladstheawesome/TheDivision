@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "PickableItem.h"
-#include "PlayerCharacter.generated.h"
-class UCameraComponent;
-class USpringArmComponent;
-class APickableItem; class APickableItemPistol;
+#include "PlayerAnimations.h"
+#include "PlayerCharacter.generated.h" 
+class UCameraComponent; class USpringArmComponent;
+class APickableItem; class APickableItemPistol; class UPlayerAnimations;
 UCLASS()
 class THEDIVISION_API APlayerCharacter : public ACharacter
 {
@@ -31,7 +31,6 @@ protected:
 		USpringArmComponent* SpringArmComp;
 
 	APickableItem* EquipedWeapon;
-
 	APickableItem* PrimaryWeaponToEquip;
 	APickableItemPistol* SecondaryWeaponToEquip;
 
@@ -48,6 +47,9 @@ protected:
 	FName RifleEquipSocketName;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+		FName RifleUnEquipSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 	FName PistolAttachSocketName;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
@@ -61,6 +63,11 @@ protected:
 
 	void EquipWeapon(APickableItem* Weapon);*/
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InputCombat")
+	bool bPrimaryToEquip;
+
+	UPlayerAnimations* SetAnimations;
+
 public:	
 
 	// Called every frame
@@ -71,6 +78,23 @@ public:
 
 	virtual FVector GetPawnViewLocation() const override;
 
-	void EquipPrimary();
+	UFUNCTION(BlueprintCallable)
+	void TogglePrimaryWeapon();
 
+	void ToggleSecondaryWeapon();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* RifleEquipMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* RifleUnEquipMontage;
+
+	UAnimNotifyState* NotifyEquip;
+
+private:
+	UPROPERTY(EditAnywhere)
+		float RotationRate = 10;
+
+	void LookUp(float AxisValue);
+	void Turn(float AxisValue);
 };
