@@ -81,6 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TogglePrimaryWeapon();
 
+	void AttachPrimaryWeaponEquip();
+
+	void ToggleCharacterMovement(bool bWeaponEquiped);
+
 	void ToggleSecondaryWeapon();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")

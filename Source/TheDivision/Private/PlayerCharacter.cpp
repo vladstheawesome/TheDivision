@@ -86,9 +86,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::StopFire);
 
 	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::TogglePrimaryWeapon);
-
-	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
 }
 
 void APlayerCharacter::LookUp(float AxisValue)
@@ -126,35 +123,46 @@ void APlayerCharacter::TogglePrimaryWeapon()
 			// TODO: Refactor if statements -> Create Equip/Unequip methods 
 					//(thus can be called by other secondary weapon functions)
 
-			ACharacter* MyCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+			//ACharacter* MyCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 
 			if (Anim->IsRifleCombatMode == true) // We Equip
-			{
-				if (MyCharacter)
-				{
-					GetCharacterMovement()->bOrientRotationToMovement = false;
-					bUseControllerRotationYaw = true;
-				}
+			{				
+				ToggleCharacterMovement(bPrimaryToEquip);
 
-				Anim->AxisTurn_ = InputComponent->GetAxisValue("Turn");;
 				EquipedWeapon = PrimaryWeaponToEquip;
 				PrimaryWeaponToEquip->SetOwner(this);
 				PlayAnimMontage(RifleEquipMontage, 1, NAME_None);
-				PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleEquipSocketName);
 			}
 			else // We UnEquip
-			{
-				// Set Equipped Weapon to null?
-				GetCharacterMovement()->bOrientRotationToMovement = true;
-				bUseControllerRotationYaw = false;
+			{				
+				ToggleCharacterMovement(bPrimaryToEquip);
 
-				Anim->AxisTurn_ = 0;
+				// Set Equipped Weapon to null?
 				PrimaryWeaponToEquip->SetOwner(this);
 				PlayAnimMontage(RifleUnEquipMontage, 1, NAME_None);
 				PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleUnEquipSocketName);
 			}
 		}
 	}	
+}
+
+void APlayerCharacter::AttachPrimaryWeaponEquip()
+{
+	PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleEquipSocketName);
+}
+
+void APlayerCharacter::ToggleCharacterMovement(bool bWeaponEquiped)
+{
+	if (bWeaponEquiped)
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		bUseControllerRotationYaw = true;
+	}
+	else
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		bUseControllerRotationYaw = false;
+	}
 }
 
 FVector APlayerCharacter::GetPawnViewLocation() const
