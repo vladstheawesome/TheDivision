@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "RifleEquipAnimNotify.generated.h"
+#include "WeaponPistolEquipNotify.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class THEDIVISION_API URifleEquipAnimNotify : public UAnimNotify
+class THEDIVISION_API UWeaponPistolEquipNotify : public UAnimNotify
 {
 	GENERATED_BODY()
 

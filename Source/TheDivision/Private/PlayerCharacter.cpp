@@ -24,12 +24,11 @@ APlayerCharacter::APlayerCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
-	RifleAttachSocketName = "Rifle_UnequipSocket";
 	RifleEquipSocketName = "Rifle_EquipSocket";
 	RifleUnEquipSocketName = "Rifle_UnequipSocket";
 
-	PistolAttachSocketName = "Pistol_UnequipSocket";
 	PistolEquipSocketName = "Pistol_EquipSocket";
+	PistolUnEquipSocketName = "Pistol_UnequipSocket";
 }
 
 // Called when the game starts or when spawned
@@ -56,7 +55,7 @@ void APlayerCharacter::SpawnPrimaryWeapon(FActorSpawnParameters& SpawnParams)
 	if (PrimaryWeaponToEquip)
 	{
 		PrimaryWeaponToEquip->SetOwner(this);
-		PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleAttachSocketName);
+		PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleUnEquipSocketName);
 	}
 }
 
@@ -67,7 +66,7 @@ void APlayerCharacter::SpawnSecondaryWeapon(FActorSpawnParameters& SpawnParams)
 	if (SecondaryWeaponToEquip)
 	{
 		SecondaryWeaponToEquip->SetOwner(this);
-		SecondaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PistolAttachSocketName);
+		SecondaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PistolUnEquipSocketName);
 	}
 }
 
@@ -86,11 +85,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::StopFire);
 
 	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::TogglePrimaryWeapon);
-}
-
-void APlayerCharacter::LookUp(float AxisValue)
-{
-
+	PlayerInputComponent->BindAction("Input_EquipSecondaryWeapon", IE_Pressed, this, &APlayerCharacter::ToggleSecondaryWeapon);
 }
 
 void APlayerCharacter::StartFire()
@@ -109,9 +104,16 @@ void APlayerCharacter::StopFire()
 	}
 }
 
+/*Primary Weapon Functions*/
 void APlayerCharacter::TogglePrimaryWeapon()
 {
 	bPrimaryToEquip = !bPrimaryToEquip;
+
+	if (bSecondaryToEquip)
+	{
+		bSecondaryToEquip = !bSecondaryToEquip;
+		AttachSecondaryWeaponUnEquip();
+	}
 
 	if (PrimaryWeaponToEquip)
 	{			
@@ -120,30 +122,28 @@ void APlayerCharacter::TogglePrimaryWeapon()
 			Anim->IsRifleCombatMode = !Anim->IsRifleCombatMode;
 
 			// TODO: Spawn Crosshairs
-			// TODO: Refactor if statements -> Create Equip/Unequip methods 
-					//(thus can be called by other secondary weapon functions)
-
-			//ACharacter* MyCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 
 			if (Anim->IsRifleCombatMode == true) // We Equip
 			{				
 				ToggleCharacterMovement(bPrimaryToEquip);
 
 				EquipedWeapon = PrimaryWeaponToEquip;
-				PrimaryWeaponToEquip->SetOwner(this);
 				PlayAnimMontage(RifleEquipMontage, 1, NAME_None);
 			}
 			else // We UnEquip
 			{				
 				ToggleCharacterMovement(bPrimaryToEquip);
 
-				// Set Equipped Weapon to null?
-				PrimaryWeaponToEquip->SetOwner(this);
+				EquipedWeapon = nullptr;
 				PlayAnimMontage(RifleUnEquipMontage, 1, NAME_None);
-				PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleUnEquipSocketName);
 			}
 		}
 	}	
+}
+
+void APlayerCharacter::AttachPrimaryWeaponUnEquip()
+{
+	PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleUnEquipSocketName);
 }
 
 void APlayerCharacter::AttachPrimaryWeaponEquip()
@@ -151,6 +151,52 @@ void APlayerCharacter::AttachPrimaryWeaponEquip()
 	PrimaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RifleEquipSocketName);
 }
 
+/*Secondary Weapon Functions*/
+void APlayerCharacter::ToggleSecondaryWeapon()
+{
+	bSecondaryToEquip = !bSecondaryToEquip;
+
+	if (bPrimaryToEquip)
+	{
+		bPrimaryToEquip = !bPrimaryToEquip;
+		AttachPrimaryWeaponUnEquip();
+	}
+
+	if (SecondaryWeaponToEquip)
+	{
+		if (auto Anim = Cast<UPlayerAnimations>(GetMesh()->GetAnimInstance()))
+		{
+			Anim->IsPistolCombatMode = !Anim->IsPistolCombatMode;
+
+			if (Anim->IsPistolCombatMode) // We  Equip Pistol
+			{
+				ToggleCharacterMovement(bSecondaryToEquip);
+
+				EquipedWeapon = SecondaryWeaponToEquip;
+				PlayAnimMontage(PistolEquipMontage, 1, NAME_None);
+			}
+			else
+			{
+				ToggleCharacterMovement(bSecondaryToEquip);
+
+				EquipedWeapon = nullptr;
+				PlayAnimMontage(PistolUnEquipMontage, 1, NAME_None);
+			}
+		}
+	}
+}
+
+void APlayerCharacter::AttachSecondaryWeaponUnEquip()
+{
+	SecondaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PistolUnEquipSocketName);
+}
+
+void APlayerCharacter::AttachSecondaryWeaponEquip()
+{
+	SecondaryWeaponToEquip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PistolEquipSocketName);
+}
+
+/*Switch/Toggle Movement Mode*/
 void APlayerCharacter::ToggleCharacterMovement(bool bWeaponEquiped)
 {
 	if (bWeaponEquiped)

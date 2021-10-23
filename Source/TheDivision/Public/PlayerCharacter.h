@@ -41,19 +41,16 @@ protected:
 	TSubclassOf<APickableItem> SecondaryWeaponClass;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
-	FName RifleAttachSocketName;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 	FName RifleEquipSocketName;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
-		FName RifleUnEquipSocketName;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
-	FName PistolAttachSocketName;
+	FName RifleUnEquipSocketName;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 	FName PistolEquipSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+	FName PistolUnEquipSocketName;
 
 	void StartFire();
 
@@ -66,7 +63,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InputCombat")
 	bool bPrimaryToEquip;
 
-	UPlayerAnimations* SetAnimations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InputCombat")
+	bool bSecondaryToEquip;
 
 public:	
 
@@ -78,14 +76,15 @@ public:
 
 	virtual FVector GetPawnViewLocation() const override;
 
-	UFUNCTION(BlueprintCallable)
 	void TogglePrimaryWeapon();
-
+	void AttachPrimaryWeaponUnEquip();
 	void AttachPrimaryWeaponEquip();
 
 	void ToggleCharacterMovement(bool bWeaponEquiped);
 
 	void ToggleSecondaryWeapon();
+	void AttachSecondaryWeaponUnEquip();
+	void AttachSecondaryWeaponEquip();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* RifleEquipMontage;
@@ -93,12 +92,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* RifleUnEquipMontage;
 
-	UAnimNotifyState* NotifyEquip;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* PistolEquipMontage;
 
-private:
-	UPROPERTY(EditAnywhere)
-		float RotationRate = 10;
-
-	void LookUp(float AxisValue);
-	void Turn(float AxisValue);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+		UAnimMontage* PistolUnEquipMontage;
 };

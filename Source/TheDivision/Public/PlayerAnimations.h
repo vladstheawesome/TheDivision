@@ -20,9 +20,5 @@ public:
 		bool IsRifleCombatMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
-		float AxisTurn_ = 0;
-
-	/*void EquipRifle(UAnimInstance* AnimInstance, USkeletalMeshComponent* Player, UAnimInstance* Anim);
-
-	FName RifleCombatMode_ = TEXT("IsRifleCombatMode_");*/
+		bool IsPistolCombatMode;
 };

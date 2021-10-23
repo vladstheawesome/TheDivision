@@ -22,7 +22,7 @@ APickableItemPistol::APickableItemPistol()
 {
 	BaseDamage = 8.0f;
 
-	RateOfFire = 250;
+	RateOfFire = 10;
 }
 
 
