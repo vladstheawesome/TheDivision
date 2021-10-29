@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 class UPawnMovementComponent;
 // Sets default values
@@ -108,8 +110,10 @@ void APlayerCharacter::StopFire()
 void APlayerCharacter::TogglePrimaryWeapon()
 {
 	bPrimaryToEquip = !bPrimaryToEquip;
+	UUserWidget* CrossHairRifle = CreateWidget(GetWorld(), CrossHairRifleClass);
 
-	if (bSecondaryToEquip)
+	// Disable/Remove any Secondary Weapon Items, if previously equipped
+	if (bSecondaryToEquip) 
 	{
 		bSecondaryToEquip = !bSecondaryToEquip;
 		AttachSecondaryWeaponUnEquip();
@@ -121,21 +125,23 @@ void APlayerCharacter::TogglePrimaryWeapon()
 		{
 			Anim->IsRifleCombatMode = !Anim->IsRifleCombatMode;
 
-			// TODO: Spawn Crosshairs
-
-			if (Anim->IsRifleCombatMode == true) // We Equip
+			if (Anim->IsRifleCombatMode == true) // We Equip Rifle
 			{				
 				ToggleCharacterMovement(bPrimaryToEquip);
-
 				EquipedWeapon = PrimaryWeaponToEquip;
 				PlayAnimMontage(RifleEquipMontage, 1, NAME_None);
+
+				if (CrossHairRifle != nullptr)
+				{
+					CrossHairRifle->AddToViewport();
+				}
 			}
-			else // We UnEquip
+			else // We UnEquip Rifle
 			{				
 				ToggleCharacterMovement(bPrimaryToEquip);
-
 				EquipedWeapon = nullptr;
 				PlayAnimMontage(RifleUnEquipMontage, 1, NAME_None);
+				UWidgetLayoutLibrary::RemoveAllWidgets(this);
 			}
 		}
 	}	
@@ -167,6 +173,7 @@ void APlayerCharacter::ToggleSecondaryWeapon()
 		if (auto Anim = Cast<UPlayerAnimations>(GetMesh()->GetAnimInstance()))
 		{
 			Anim->IsPistolCombatMode = !Anim->IsPistolCombatMode;
+			UUserWidget* CrossHairPistol = CreateWidget(GetWorld(), CrossHairRifleClass);
 
 			if (Anim->IsPistolCombatMode) // We  Equip Pistol
 			{

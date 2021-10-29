@@ -97,4 +97,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 		UAnimMontage* PistolUnEquipMontage;
+
+public:
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UUserWidget> CrossHairRifleClass;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class UUserWidget> CrossHairPistolClass;
 };
