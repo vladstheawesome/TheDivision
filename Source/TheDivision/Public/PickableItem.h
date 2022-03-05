@@ -30,7 +30,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "Weapon")
 	FName TracerTargetName;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* MuzzleEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
@@ -67,6 +67,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		USphereComponent* InteractableArea;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+		class USoundCue* AssaultRifleFireSound;
+
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -76,4 +79,6 @@ public:
 
 	//UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Fire();
+
+	void Shoot();
 };

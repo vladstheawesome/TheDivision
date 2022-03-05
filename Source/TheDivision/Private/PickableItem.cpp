@@ -7,6 +7,9 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "TimerManager.h"
+#include "Sound/SoundCue.h"
+#include "GameFramework/Character.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "TheDivision/TheDivision.h"
 
 static int32 DebugWeaponDrawing = 0;
@@ -111,6 +114,27 @@ void APickableItem::Fire()
 
 		LastFireTime = GetWorld()->TimeSeconds;
 	}	
+}
+
+void APickableItem::Shoot()
+{
+	if (AssaultRifleFireSound)
+	{
+		UGameplayStatics::PlaySound2D(this, AssaultRifleFireSound);
+	}
+
+	const USkeletalMeshSocket* BarrelSocket = ItemMesh->GetSocketByName(MuzzleSocketName);
+	if (BarrelSocket)
+	{
+		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(ItemMesh);
+
+		if (MuzzleEffect)
+		{
+			//UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, ItemMesh, MuzzleSocketName);
+
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, SocketTransform);
+		}
+	}
 }
 
 void APickableItem::StartFire()

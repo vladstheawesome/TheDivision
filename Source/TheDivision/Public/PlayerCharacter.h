@@ -104,4 +104,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class UUserWidget> CrossHairPistolClass;
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	class USoundCue* AssaultRifleFireSound;
 };

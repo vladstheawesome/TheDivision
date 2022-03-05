@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Sound/SoundCue.h"
 
 class UPawnMovementComponent;
 // Sets default values
@@ -83,8 +84,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::StartFire);
-	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::StopFire);
+	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &APlayerCharacter::StartFire);
+	PlayerInputComponent->BindAction("FireButton", IE_Released, this, &APlayerCharacter::StopFire);
 
 	PlayerInputComponent->BindAction("Input_EquipPrimaryWeapon", IE_Pressed, this, &APlayerCharacter::TogglePrimaryWeapon);
 	PlayerInputComponent->BindAction("Input_EquipSecondaryWeapon", IE_Pressed, this, &APlayerCharacter::ToggleSecondaryWeapon);
@@ -94,7 +95,10 @@ void APlayerCharacter::StartFire()
 {
 	if (EquipedWeapon)
 	{
-		EquipedWeapon->StartFire();
+		//EquipedWeapon->StartFire();
+		UE_LOG(LogTemp, Warning, TEXT("Fire Weapon!"));
+
+		EquipedWeapon->Shoot();		
 	}
 }
 
@@ -102,7 +106,7 @@ void APlayerCharacter::StopFire()
 {
 	if (EquipedWeapon)
 	{
-		EquipedWeapon->StopFire();
+		//EquipedWeapon->StopFire();
 	}
 }
 
@@ -117,6 +121,7 @@ void APlayerCharacter::TogglePrimaryWeapon()
 	{
 		bSecondaryToEquip = !bSecondaryToEquip;
 		AttachSecondaryWeaponUnEquip();
+		UWidgetLayoutLibrary::RemoveAllWidgets(this);
 	}
 
 	if (PrimaryWeaponToEquip)
@@ -161,11 +166,13 @@ void APlayerCharacter::AttachPrimaryWeaponEquip()
 void APlayerCharacter::ToggleSecondaryWeapon()
 {
 	bSecondaryToEquip = !bSecondaryToEquip;
+	UUserWidget* CrossHairPistol = CreateWidget(GetWorld(), CrossHairPistolClass);
 
 	if (bPrimaryToEquip)
 	{
 		bPrimaryToEquip = !bPrimaryToEquip;
 		AttachPrimaryWeaponUnEquip();
+		UWidgetLayoutLibrary::RemoveAllWidgets(this);
 	}
 
 	if (SecondaryWeaponToEquip)
@@ -173,21 +180,24 @@ void APlayerCharacter::ToggleSecondaryWeapon()
 		if (auto Anim = Cast<UPlayerAnimations>(GetMesh()->GetAnimInstance()))
 		{
 			Anim->IsPistolCombatMode = !Anim->IsPistolCombatMode;
-			UUserWidget* CrossHairPistol = CreateWidget(GetWorld(), CrossHairRifleClass);
 
 			if (Anim->IsPistolCombatMode) // We  Equip Pistol
 			{
 				ToggleCharacterMovement(bSecondaryToEquip);
-
 				EquipedWeapon = SecondaryWeaponToEquip;
 				PlayAnimMontage(PistolEquipMontage, 1, NAME_None);
+
+				if (CrossHairPistol != nullptr)
+				{
+					CrossHairPistol->AddToViewport();
+				}
 			}
 			else
 			{
 				ToggleCharacterMovement(bSecondaryToEquip);
-
 				EquipedWeapon = nullptr;
 				PlayAnimMontage(PistolUnEquipMontage, 1, NAME_None);
+				UWidgetLayoutLibrary::RemoveAllWidgets(this);
 			}
 		}
 	}
