@@ -5,8 +5,9 @@
 #include "PickableItem.h"
 #include "PlayerAnimations.h"
 #include "PlayerCharacter.generated.h" 
-class UCameraComponent; class USpringArmComponent;
-class APickableItem; class APickableItemPistol; class UPlayerAnimations;
+class UCameraComponent; class USpringArmComponent; class APickableItem; 
+class APickableItemPistol; class UPlayerAnimations;
+
 UCLASS()
 class THEDIVISION_API APlayerCharacter : public ACharacter
 {
@@ -66,6 +67,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InputCombat")
 	bool bSecondaryToEquip;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "Weapon")
+		FName MuzzleSocketName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+		UParticleSystem* MuzzleEffect;
+
 public:	
 
 	// Called every frame
@@ -108,4 +115,7 @@ public:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	class USoundCue* AssaultRifleFireSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* RifleFireMontage;
 };

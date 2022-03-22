@@ -12,6 +12,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Sound/SoundCue.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "DrawDebugHelpers.h"
 
 class UPawnMovementComponent;
 // Sets default values
@@ -32,6 +34,8 @@ APlayerCharacter::APlayerCharacter()
 
 	PistolEquipSocketName = "Pistol_EquipSocket";
 	PistolUnEquipSocketName = "Pistol_UnequipSocket";
+
+	MuzzleSocketName = "MuzzleSocket";
 }
 
 // Called when the game starts or when spawned
@@ -93,12 +97,60 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::StartFire()
 {
+	AActor* MyOwner = GetOwner();
+
 	if (EquipedWeapon)
 	{
-		//EquipedWeapon->StartFire();
 		UE_LOG(LogTemp, Warning, TEXT("Fire Weapon!"));
 
-		EquipedWeapon->Shoot();		
+		if (AssaultRifleFireSound)
+		{
+			UGameplayStatics::PlaySound2D(this, AssaultRifleFireSound);
+		}
+
+		//const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName(MuzzleSocketName);
+		const USkeletalMeshSocket* BarrelSocket = EquipedWeapon->ItemMesh->GetSocketByName(MuzzleSocketName);
+		if (BarrelSocket)
+		{
+			//const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
+			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquipedWeapon->ItemMesh);
+
+			if (MuzzleEffect)
+			{
+				UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, EquipedWeapon->ItemMesh, MuzzleSocketName);
+				//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, SocketTransform);
+			}
+
+			FHitResult FireHit;
+			const FVector Start{ SocketTransform.GetLocation() };
+			const FQuat Rotation{ SocketTransform.GetRotation() };
+			const FVector RotationAxis{ Rotation.GetAxisX() };
+
+			FVector EyeLocation;
+			FRotator EyeRotation;
+			MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+			FVector ShotDirection = EyeRotation.Vector();
+
+			//const FVector End{ Start + RotationAxis * 50'000.f };
+			const FVector End = EyeLocation + (ShotDirection * 50'000.f);
+
+			GetWorld()->LineTraceSingleByChannel(FireHit, EyeLocation, End, ECollisionChannel::ECC_Visibility);
+			
+			if (FireHit.bBlockingHit)
+			{
+				DrawDebugLine(GetWorld(), EyeLocation, End, FColor::Red, false, 1.0f, 0, 1.0f);
+				DrawDebugPoint(GetWorld(), FireHit.Location, 5.f, FColor::Red, false, 1.0f);
+			}
+			
+		}
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		if (AnimInstance && RifleFireMontage)
+		{
+			AnimInstance->Montage_Play(RifleFireMontage);
+			AnimInstance->Montage_JumpToSection(FName("StartFire"));
+		}
 	}
 }
 
@@ -134,7 +186,10 @@ void APlayerCharacter::TogglePrimaryWeapon()
 			{				
 				ToggleCharacterMovement(bPrimaryToEquip);
 				EquipedWeapon = PrimaryWeaponToEquip;
-				PlayAnimMontage(RifleEquipMontage, 1, NAME_None);
+				//PlayAnimMontage(RifleEquipMontage, 1, NAME_None);
+
+				Anim->Montage_Play(RifleEquipMontage);
+				Anim->Montage_JumpToSection(FName("EquipRifle"));
 
 				if (CrossHairRifle != nullptr)
 				{

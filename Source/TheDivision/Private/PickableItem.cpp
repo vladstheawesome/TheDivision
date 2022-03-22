@@ -131,9 +131,16 @@ void APickableItem::Shoot()
 		if (MuzzleEffect)
 		{
 			//UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, ItemMesh, MuzzleSocketName);
-
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, SocketTransform);
 		}
+	}
+
+	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (/*AnimInstance &&*/ RifleFireMontage)
+	{
+		/*AnimInstance->Montage_Play(RifleFireMontage);
+		AnimInstance->Montage_JumpToSection(FName("StartFire"));*/
+
 	}
 }
 

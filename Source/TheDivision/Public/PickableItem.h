@@ -3,9 +3,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
+#include "PlayerAnimations.h"
+//#include "PlayerCharacter.h"
 #include "PickableItem.generated.h"
-class UDamageType;
-class UParticleSystem;
+class UDamageType; class UParticleSystem;
 UCLASS()
 class THEDIVISION_API APickableItem : public AActor
 {
@@ -42,8 +43,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Weapon")
 	UParticleSystem* TracerEffect;
 
-	UPROPERTY(VisibleAnywhere)
-		USkeletalMeshComponent* ItemMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float BaseDamage;
@@ -70,6 +69,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 		class USoundCue* AssaultRifleFireSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* RifleFireMontage;
+
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -81,4 +83,7 @@ public:
 	void Fire();
 
 	void Shoot();
+
+	UPROPERTY(VisibleAnywhere)
+		USkeletalMeshComponent* ItemMesh;
 };
