@@ -73,6 +73,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 		UParticleSystem* MuzzleEffect;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+		UParticleSystem* ImpactParticles;
+
 public:	
 
 	// Called every frame
@@ -118,4 +121,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* RifleFireMontage;
+
+	/* Smoke trail for bullets */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* BeamParticles;
 };

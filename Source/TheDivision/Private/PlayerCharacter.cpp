@@ -14,6 +14,7 @@
 #include "Sound/SoundCue.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "DrawDebugHelpers.h"
+#include "Particles/ParticleSystemComponent.h"
 
 class UPawnMovementComponent;
 // Sets default values
@@ -134,14 +135,33 @@ void APlayerCharacter::StartFire()
 			//const FVector End{ Start + RotationAxis * 50'000.f };
 			const FVector End = EyeLocation + (ShotDirection * 50'000.f);
 
+			FVector BeamEndPoint{ End };
+
 			GetWorld()->LineTraceSingleByChannel(FireHit, EyeLocation, End, ECollisionChannel::ECC_Visibility);
 			
 			if (FireHit.bBlockingHit)
 			{
-				DrawDebugLine(GetWorld(), EyeLocation, End, FColor::Red, false, 1.0f, 0, 1.0f);
-				DrawDebugPoint(GetWorld(), FireHit.Location, 5.f, FColor::Red, false, 1.0f);
+				//DrawDebugLine(GetWorld(), EyeLocation, End, FColor::Red, false, 1.0f, 0, 1.0f);
+				//DrawDebugPoint(GetWorld(), FireHit.Location, 5.f, FColor::Red, false, 1.0f);
+
+				// Set our Beam Endpoint to be the FireHit.Location
+				BeamEndPoint = FireHit.Location;
+
+				// Spawn Impact Particle System
+				if (ImpactParticles)
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, FireHit.Location);
+				}
+			}	
+
+			if (BeamParticles)
+			{
+				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, SocketTransform);
+				if (Beam)
+				{
+					Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
+				}
 			}
-			
 		}
 
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
